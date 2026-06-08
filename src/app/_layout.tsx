@@ -1,15 +1,37 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { Stack } from 'expo-router'
+import { TamaguiProvider } from 'tamagui'
+import { Provider } from 'react-redux'
+import tamaguiConfig from '../../tamagui.config'
+import { store } from '../store'
+import { useFonts } from 'expo-font'
+import { useEffect } from 'react'
+import * as SplashScreen from 'expo-splash-screen'
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+SplashScreen.preventAutoHideAsync()
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  const [loaded] = useFonts({
+    Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
+    InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
+  })
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync()
+    }
+  }, [loaded])
+
+  if (!loaded) return null
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
-  );
+    <Provider store={store}>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="light_pastelBlue">
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="cart" options={{ presentation: 'modal', title: 'Cart' }} />
+        </Stack>
+      </TamaguiProvider>
+    </Provider>
+  )
 }

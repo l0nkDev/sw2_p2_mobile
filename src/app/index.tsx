@@ -1,98 +1,67 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react'
+import { YStack, XStack, Input, Button, Text, SizableText, Image } from 'tamagui'
+import { router } from 'expo-router'
+import { useLoginMutation } from '../store/api'
+import { setToken } from '../store/authSlice'
+import { useDispatch } from 'react-redux'
+import { Alert } from 'react-native'
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function LoginScreen() {
+  const [email, setEmail] = useState('admin@multifarmacia.local')
+  const [password, setPassword] = useState('Admin12345')
+  const [login, { isLoading }] = useLoginMutation()
+  const dispatch = useDispatch()
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  const handleLogin = async () => {
+    try {
+      const response = await login({ correo_electronico: email, contrasena: password }).unwrap()
+      if (response.login?.access_token) {
+        dispatch(setToken(response.login.access_token))
+        router.replace('/(tabs)/store')
+      } else {
+        Alert.alert('Error', 'Invalid credentials')
+      }
+    } catch (err) {
+      console.error(err)
+      Alert.alert('Error', 'Network or server error during login')
+    }
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
+    <YStack f={1} jc="center" ai="center" p="$4" gap="$4" bg="$background">
+      <SizableText size="$9" fontWeight="bold" color="$color">
+        Pharmacy App
+      </SizableText>
+      <SizableText size="$4" color="$colorHover" mb="$4">
+        Log in to continue
+      </SizableText>
+
+      <YStack w="100%" maxWidth={400} gap="$3">
+        <Input
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <Input
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <Button
+          onPress={handleLogin}
+          disabled={isLoading}
+          mt="$4"
+          bg="$color"
+          color="white"
+          hoverStyle={{ bg: '$colorHover' }}
+          pressStyle={{ bg: '$colorPress' }}
+        >
+          {isLoading ? 'Logging in...' : 'Sign In'}
+        </Button>
+      </YStack>
+    </YStack>
+  )
 }
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
