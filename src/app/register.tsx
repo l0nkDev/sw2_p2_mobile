@@ -1,11 +1,17 @@
-import { router } from 'expo-router'
-import * as SecureStore from 'expo-secure-store'
-import { useState } from 'react'
-import { Alert } from 'react-native'
-import { useDispatch } from 'react-redux'
-import { Button, Input, ScrollView, SizableText, Spinner, YStack } from 'tamagui'
-import { useRegisterMutation } from '../store/api'
-import { setToken } from '../store/authSlice'
+import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import { useState } from 'react';
+import { Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
+import {
+  Button, Input, ScrollView, SizableText, Spinner, YStack,
+} from 'tamagui';
+import { useRegisterMutation } from '../store/api';
+import { setToken } from '../store/authSlice';
+
+function LoadingSpinner() {
+  return <Spinner color="white" />;
+}
 
 export default function RegisterScreen() {
   const [form, setForm] = useState({
@@ -15,38 +21,39 @@ export default function RegisterScreen() {
     correo_electronico: '',
     contrasena: '',
     celular: '',
-  })
+  });
 
-  const [register, { isLoading }] = useRegisterMutation()
-  const dispatch = useDispatch()
+  const [register, { isLoading }] = useRegisterMutation();
+  const dispatch = useDispatch();
 
   const handleRegister = async () => {
     if (
-      !form.nombre ||
-      !form.apellido ||
-      !form.correo_electronico ||
-      !form.contrasena ||
-      !form.nombre_usuario
+      !form.nombre
+      || !form.apellido
+      || !form.correo_electronico
+      || !form.contrasena
+      || !form.nombre_usuario
     ) {
-      Alert.alert('Error', 'Please fill in all required fields')
-      return
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
     }
 
     try {
-      const response = await register(form).unwrap()
+      const response = await register(form).unwrap();
       if (response.register?.access_token) {
-        const token = response.register.access_token
-        await SecureStore.setItemAsync('token', token)
-        dispatch(setToken(token))
-        router.replace('/(tabs)/store')
+        const token = response.register.access_token;
+        await SecureStore.setItemAsync('token', token);
+        dispatch(setToken(token));
+        router.replace('/(tabs)/store');
       } else {
-        Alert.alert('Error', 'Registration failed')
+        Alert.alert('Error', 'Registration failed');
       }
     } catch (err: any) {
-      console.error(err)
-      Alert.alert('Error', err.data?.message || 'Network or server error during registration')
+      // eslint-disable-next-line no-console
+      console.error(err);
+      Alert.alert('Error', err.data?.message || 'Network or server error during registration');
     }
-  }
+  };
 
   return (
     <ScrollView bg="$background">
@@ -109,7 +116,7 @@ export default function RegisterScreen() {
             color="white"
             hoverStyle={{ bg: '$colorHover' }}
             pressStyle={{ bg: '$colorPress' }}
-            icon={isLoading ? () => <Spinner color="white" /> : undefined}
+            icon={isLoading ? LoadingSpinner : undefined}
           >
             {isLoading ? 'Creating account...' : 'Register'}
           </Button>
@@ -120,5 +127,5 @@ export default function RegisterScreen() {
         </YStack>
       </YStack>
     </ScrollView>
-  )
+  );
 }

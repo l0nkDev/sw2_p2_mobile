@@ -1,55 +1,59 @@
-import * as Location from 'expo-location'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Check, ChevronUp, MapPin } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
-import { Platform } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
-import { Button, ScrollView, Sheet, SizableText, Spinner, XStack, YStack } from 'tamagui'
-import { RootState } from '../store'
-import { useGetSucursalesQuery } from '../store/api'
-import { setSucursal } from '../store/cartSlice'
+import * as Location from 'expo-location';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Check, ChevronUp, MapPin } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Button, ScrollView, Sheet, SizableText, Spinner, XStack, YStack,
+} from 'tamagui';
+import { RootState } from '../store';
+import { useGetSucursalesQuery } from '../store/api';
+import { setSucursal } from '../store/cartSlice';
 
-let MapView: any = null
-let Marker: any = null
+let MapView: any = null;
+let Marker: any = null;
 if (Platform.OS !== 'web') {
-  const Maps = require('react-native-maps')
-  MapView = Maps.default
-  Marker = Maps.Marker
+  // eslint-disable-next-line global-require
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Marker = Maps.Marker;
 }
 
 export default function MapScreen() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null)
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  const { focusSucursalId } = useLocalSearchParams()
+  const { focusSucursalId } = useLocalSearchParams();
 
-  const { data: sucursalesData, isLoading: isLoadingSucursales } = useGetSucursalesQuery({})
-  const currentSucursalId = useSelector((state: RootState) => state.cart.sucursalId)
-  const dispatch = useDispatch()
-  const router = useRouter()
+  const { data: sucursalesData, isLoading: isLoadingSucursales } = useGetSucursalesQuery({});
+  const currentSucursalId = useSelector((state: RootState) => state.cart.sucursalId);
+  const dispatch = useDispatch();
+  const router = useRouter();
 
-  const focusId = focusSucursalId ? Number(focusSucursalId) : currentSucursalId
-  const focusedSucursal = sucursalesData?.sucursales?.find((s: any) => s.id === focusId)
+  const focusId = focusSucursalId ? Number(focusSucursalId) : currentSucursalId;
+  const focusedSucursal = sucursalesData?.sucursales?.find((s: any) => s.id === focusId);
 
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       try {
-        const loc = await Location.getCurrentPositionAsync({})
-        setLocation(loc)
+        const loc = await Location.getCurrentPositionAsync({});
+        setLocation(loc);
       } catch (e) {
-        console.error(e)
+        // eslint-disable-next-line no-console
+        console.error(e);
       }
-    })()
-  }, [])
+    })();
+  }, []);
 
   const handleSelectSucursal = (id: number) => {
-    dispatch(setSucursal(id))
-    setSheetOpen(false)
-    router.back()
-  }
+    dispatch(setSucursal(id));
+    setSheetOpen(false);
+    router.back();
+  };
 
-  const centerLat = focusedSucursal?.latitud || location?.coords.latitude || 0
-  const centerLon = focusedSucursal?.longitud || location?.coords.longitude || 0
+  const centerLat = focusedSucursal?.latitud || location?.coords.latitude || 0;
+  const centerLon = focusedSucursal?.longitud || location?.coords.longitude || 0;
 
   if (isLoadingSucursales || (!focusedSucursal && !location)) {
     return (
@@ -59,7 +63,7 @@ export default function MapScreen() {
           Cargando mapa...
         </SizableText>
       </YStack>
-    )
+    );
   }
 
   return (
@@ -71,7 +75,7 @@ export default function MapScreen() {
       ) : (
         <MapView
           style={{ flex: 1 }}
-          showsUserLocation={true}
+          showsUserLocation
           region={{
             latitude: centerLat,
             longitude: centerLon,
@@ -80,8 +84,8 @@ export default function MapScreen() {
           }}
         >
           {sucursalesData?.sucursales?.map((suc: any) => {
-            if (!suc.latitud || !suc.longitud) return null
-            const isClosest = suc.id === currentSucursalId
+            if (!suc.latitud || !suc.longitud) return null;
+            const isClosest = suc.id === currentSucursalId;
             return (
               <Marker
                 key={suc.id}
@@ -94,7 +98,7 @@ export default function MapScreen() {
                 pinColor={isClosest ? 'green' : 'red'}
                 onPress={() => handleSelectSucursal(suc.id)}
               />
-            )
+            );
           })}
         </MapView>
       )}
@@ -133,7 +137,7 @@ export default function MapScreen() {
           <ScrollView>
             <YStack gap="$2">
               {sucursalesData?.sucursales?.map((suc: any) => {
-                const isSelected = suc.id === currentSucursalId
+                const isSelected = suc.id === currentSucursalId;
                 return (
                   <Button
                     key={suc.id}
@@ -159,12 +163,12 @@ export default function MapScreen() {
                       </SizableText>
                     </YStack>
                   </Button>
-                )
+                );
               })}
             </YStack>
           </ScrollView>
         </Sheet.Frame>
       </Sheet>
     </YStack>
-  )
+  );
 }

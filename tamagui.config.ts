@@ -1,6 +1,7 @@
-import { config } from '@tamagui/config/v3'
-import { shorthands } from '@tamagui/shorthands'
-import { createTamagui } from 'tamagui'
+/* eslint-disable import/no-extraneous-dependencies */
+import { config } from '@tamagui/config/v3';
+import { shorthands } from '@tamagui/shorthands';
+import { createTamagui } from 'tamagui';
 
 const mintGreen = {
   background: '#F0FDF4',
@@ -13,7 +14,7 @@ const mintGreen = {
   colorHover: '#059669',
   colorPress: '#047857',
   colorFocus: '#064E3B',
-}
+};
 
 export const tamaguiConfig = createTamagui({
   ...config,
@@ -32,13 +33,13 @@ export const tamaguiConfig = createTamagui({
     dark_pastelBlue: {
       ...config.themes.dark,
       ...mintGreen,
-    }
+    },
   },
-})
+});
 
-export default tamaguiConfig
+export default tamaguiConfig;
 
-export type Conf = typeof tamaguiConfig
+export type Conf = typeof tamaguiConfig;
 
 declare module 'tamagui' {
   interface TamaguiCustomConfig extends Conf {}

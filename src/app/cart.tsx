@@ -1,38 +1,41 @@
-import { router } from 'expo-router'
-import { Alert } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
-import { Button, Card, ScrollView, SizableText, XStack, YStack } from 'tamagui'
-import { RootState } from '../store'
-import { useCreateVentaMutation } from '../store/api'
-import { clearCart, removeItem } from '../store/cartSlice'
+import { router } from 'expo-router';
+import { Alert } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Button, Card, ScrollView, SizableText, XStack, YStack,
+} from 'tamagui';
+import { RootState } from '../store';
+import { useCreateVentaMutation } from '../store/api';
+import { clearCart, removeItem } from '../store/cartSlice';
 
 export default function CartScreen() {
-  const cartItems = useSelector((state: RootState) => state.cart.items)
-  const sucursalId = useSelector((state: RootState) => state.cart.sucursalId)
-  const dispatch = useDispatch()
-  const [createVenta, { isLoading }] = useCreateVentaMutation()
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const sucursalId = useSelector((state: RootState) => state.cart.sucursalId);
+  const dispatch = useDispatch();
+  const [createVenta, { isLoading }] = useCreateVentaMutation();
 
-  const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0)
+  const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
   const handleCheckout = async () => {
-    if (!sucursalId || cartItems.length === 0) return
+    if (!sucursalId || cartItems.length === 0) return;
 
     try {
       const detalles = cartItems.map((item) => ({
         productoId: item.productoId,
         cantidad: item.cantidad,
-      }))
+      }));
 
-      await createVenta({ sucursalId, detalles }).unwrap()
+      await createVenta({ sucursalId, detalles }).unwrap();
 
-      Alert.alert('Success', 'Orden creada exitosamente!')
-      dispatch(clearCart())
-      router.back()
+      Alert.alert('Success', 'Orden creada exitosamente!');
+      dispatch(clearCart());
+      router.back();
     } catch (err) {
-      console.error(err)
-      Alert.alert('Error', 'Fallo al crear la orden')
+      // eslint-disable-next-line no-console
+      console.error(err);
+      Alert.alert('Error', 'Fallo al crear la orden');
     }
-  }
+  };
 
   return (
     <YStack f={1} bg="$background" p="$4">
@@ -59,7 +62,10 @@ export default function CartScreen() {
                       {item.nombre}
                     </SizableText>
                     <SizableText color="$colorHover">
-                      {item.cantidad} x Bs. {item.precio.toFixed(2)}
+                      {item.cantidad}
+                      {' '}
+                      x Bs.
+                      {item.precio.toFixed(2)}
                     </SizableText>
                   </YStack>
                   <Button
@@ -83,7 +89,8 @@ export default function CartScreen() {
               Total:
             </SizableText>
             <SizableText size="$6" fontWeight="bold" color="$color">
-              Bs.{total.toFixed(2)}
+              Bs.
+              {total.toFixed(2)}
             </SizableText>
           </XStack>
           <Button bg="$color" color="white" onPress={handleCheckout} disabled={isLoading}>
@@ -92,5 +99,5 @@ export default function CartScreen() {
         </YStack>
       )}
     </YStack>
-  )
+  );
 }

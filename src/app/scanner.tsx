@@ -1,44 +1,48 @@
-import { CameraView, useCameraPermissions } from 'expo-camera'
-import * as FileSystem from 'expo-file-system/legacy'
-import { router } from 'expo-router'
-import { CheckCircle, RefreshCcw, X } from 'lucide-react-native'
-import { useRef, useState } from 'react'
-import { Alert, Image, StyleSheet, TouchableOpacity } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
-import { Button, Card, ScrollView, SizableText, Spinner, XStack, YStack } from 'tamagui'
-import { RootState } from '../store'
-import { useGetProductosQuery } from '../store/api'
-import { addItem } from '../store/cartSlice'
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as FileSystem from 'expo-file-system/legacy';
+import { router } from 'expo-router';
+import { CheckCircle, RefreshCcw, X } from 'lucide-react-native';
+import { useRef, useState } from 'react';
+import {
+  Alert, Image, StyleSheet, TouchableOpacity,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Button, Card, ScrollView, SizableText, Spinner, XStack, YStack,
+} from 'tamagui';
+import { RootState } from '../store';
+import { useGetProductosQuery } from '../store/api';
+import { addItem } from '../store/cartSlice';
 
 type AIResult = {
   name: string
   dosage: string
   prescribed_units: number
   unit_type: string
-}
+};
 
 export default function ScannerScreen() {
-  const [permission, requestPermission] = useCameraPermissions()
-  const [photoUri, setPhotoUri] = useState<string | null>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [results, setResults] = useState<AIResult[] | null>(null)
+  const [permission, requestPermission] = useCameraPermissions();
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [results, setResults] = useState<AIResult[] | null>(null);
 
-  const cameraRef = useRef<CameraView>(null)
+  const cameraRef = useRef<CameraView>(null);
 
-  const dispatch = useDispatch()
-  const sucursalId = useSelector((state: RootState) => state.cart.sucursalId)
-  const token = useSelector((state: RootState) => state.auth.token)
+  const dispatch = useDispatch();
+  const sucursalId = useSelector((state: RootState) => state.cart.sucursalId);
+  const token = useSelector((state: RootState) => state.auth.token);
   const { data: storeData } = useGetProductosQuery(
     { sucursalId: sucursalId! },
     { skip: !sucursalId },
-  )
+  );
 
   if (!permission) {
     return (
       <YStack f={1} jc="center" ai="center">
         <Spinner size="large" />
       </YStack>
-    )
+    );
   }
 
   if (!permission.granted) {
@@ -51,24 +55,25 @@ export default function ScannerScreen() {
           Otorgar Permiso
         </Button>
       </YStack>
-    )
+    );
   }
 
   const handleTakePicture = async () => {
     if (cameraRef.current) {
       try {
-        const photo = await cameraRef.current.takePictureAsync({ quality: 1, base64: true })
-        if (photo) setPhotoUri(photo.uri)
+        const photo = await cameraRef.current.takePictureAsync({ quality: 1, base64: true });
+        if (photo) setPhotoUri(photo.uri);
       } catch (error) {
-        Alert.alert('Error', 'No se pudo capturar la imagen.')
-        console.error(error)
+        Alert.alert('Error', 'No se pudo capturar la imagen.');
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     }
-  }
+  };
 
   const handleAnalyze = async () => {
-    if (!photoUri) return
-    setIsAnalyzing(true)
+    if (!photoUri) return;
+    setIsAnalyzing(true);
     try {
       const uploadResult = await FileSystem.uploadAsync(
         'https://pharmacy.lonk.dev/api/ai/scan-prescription',
@@ -76,64 +81,65 @@ export default function ScannerScreen() {
         {
           httpMethod: 'POST',
           uploadType:
-            (FileSystem as any).UploadType?.MULTIPART ??
-            (FileSystem as any).FileSystemUploadType?.MULTIPART ??
-            1,
+            (FileSystem as any).UploadType?.MULTIPART
+            ?? (FileSystem as any).FileSystemUploadType?.MULTIPART
+            ?? 1,
           fieldName: 'file',
           mimeType: 'image/jpeg',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         },
-      )
+      );
 
       if (uploadResult.status !== 200) {
-        throw new Error(`HTTP error! status: ${uploadResult.status}`)
+        throw new Error(`HTTP error! status: ${uploadResult.status}`);
       }
 
-      const data = JSON.parse(uploadResult.body)
+      const data = JSON.parse(uploadResult.body);
       if (data.success && data.order) {
-        setResults(data.order)
+        setResults(data.order);
       } else {
-        Alert.alert('Aviso', 'No se encontraron medicamentos legibles en la receta.')
-        setPhotoUri(null)
+        Alert.alert('Aviso', 'No se encontraron medicamentos legibles en la receta.');
+        setPhotoUri(null);
       }
     } catch (error) {
-      console.error(error)
-      Alert.alert('Error', 'Hubo un problema al analizar la receta.')
+      // eslint-disable-next-line no-console
+      console.error(error);
+      Alert.alert('Error', 'Hubo un problema al analizar la receta.');
     } finally {
-      setIsAnalyzing(false)
+      setIsAnalyzing(false);
     }
-  }
+  };
 
   const findMatchingProduct = (medName: string) => {
-    if (!storeData?.productos) return null
-    const nameLower = medName.toLowerCase()
+    if (!storeData?.productos) return null;
+    const nameLower = medName.toLowerCase();
 
-    return storeData.productos.find((p: any) => p.nombre.toLowerCase().includes(nameLower))
-  }
+    return storeData.productos.find((p: any) => p.nombre.toLowerCase().includes(nameLower));
+  };
 
   const handleAddToCart = (product: any, prescribedUnits: number) => {
     // Basic logic: Assume 1 box = 10 units for this prototype unless specified
     // In a real app, the product DB would have `units_per_box`
-    const unitsPerBox = 10
-    const boxesNeeded = Math.ceil(prescribedUnits / unitsPerBox)
+    const unitsPerBox = 10;
+    const boxesNeeded = Math.ceil(prescribedUnits / unitsPerBox);
 
-    for (let i = 0; i < boxesNeeded; i++) {
+    for (let i = 0; i < boxesNeeded; i += 1) {
       dispatch(
         addItem({
           productoId: product.id,
           nombre: product.nombre,
           precio: product.precio_venta,
         }),
-      )
+      );
     }
 
     Alert.alert(
       '¡Agregado!',
       `Se agregaron ${boxesNeeded} caja(s) de ${product.nombre} al carrito.`,
-    )
-  }
+    );
+  };
 
   // 1. Review Results Mode
   if (results) {
@@ -147,9 +153,10 @@ export default function ScannerScreen() {
         </XStack>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
           {results.map((med, index) => {
-            const matchedProduct = findMatchingProduct(med.name)
+            const matchedProduct = findMatchingProduct(med.name);
             return (
               <Card
+                // eslint-disable-next-line react/no-array-index-key
                 key={index}
                 borderWidth={1}
                 borderColor="$borderColor"
@@ -158,10 +165,18 @@ export default function ScannerScreen() {
                 bg="white"
               >
                 <SizableText size="$5" fontWeight="bold" color="$color">
-                  Receta: {med.name} {med.dosage}
+                  Receta:
+                  {' '}
+                  {med.name}
+                  {' '}
+                  {med.dosage}
                 </SizableText>
                 <SizableText>
-                  Cantidad Recetada: {med.prescribed_units} {med.unit_type}
+                  Cantidad Recetada:
+                  {' '}
+                  {med.prescribed_units}
+                  {' '}
+                  {med.unit_type}
                 </SizableText>
 
                 <YStack mt="$2" p="$3" bg="$backgroundHover" borderRadius="$2" gap="$2">
@@ -172,7 +187,9 @@ export default function ScannerScreen() {
                     <>
                       <SizableText>{matchedProduct.nombre}</SizableText>
                       <SizableText color="$colorHover">
-                        Bs. {matchedProduct.precio_venta.toFixed(2)}
+                        Bs.
+                        {' '}
+                        {matchedProduct.precio_venta.toFixed(2)}
                       </SizableText>
                       <Button
                         mt="$2"
@@ -189,11 +206,11 @@ export default function ScannerScreen() {
                   )}
                 </YStack>
               </Card>
-            )
+            );
           })}
         </ScrollView>
       </YStack>
-    )
+    );
   }
 
   // 2. Photo Preview Mode
@@ -234,7 +251,7 @@ export default function ScannerScreen() {
           </XStack>
         )}
       </YStack>
-    )
+    );
   }
 
   // 3. Camera Capture Mode
@@ -270,5 +287,5 @@ export default function ScannerScreen() {
         </TouchableOpacity>
       </YStack>
     </YStack>
-  )
+  );
 }

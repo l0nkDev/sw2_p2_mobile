@@ -1,29 +1,30 @@
-import { createApi } from '@reduxjs/toolkit/query/react'
-import { ClientError, GraphQLClient } from 'graphql-request'
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { ClientError, GraphQLClient } from 'graphql-request';
 
-const client = new GraphQLClient('https://pharmacy.lonk.dev/graphql')
+const client = new GraphQLClient('https://pharmacy.lonk.dev/graphql');
 // const client = new GraphQLClient('http://10.5.205.211:3000/graphql')
 
-const graphqlBaseQuery =
-  () =>
-  async ({ body, variables }: { body: string; variables?: any }, { getState }: any) => {
-    try {
-      const state = getState()
-      const token = state.auth?.token
-      if (token) {
-        client.setHeader('authorization', `Bearer ${token}`)
-      } else {
-        client.setHeader('authorization', '')
-      }
-      const result = await client.request(body, variables)
-      return { data: result }
-    } catch (error) {
-      if (error instanceof ClientError) {
-        return { error: { status: error.response.status, data: error.response.data } }
-      }
-      return { error: { status: 500, data: String(error) } }
+const graphqlBaseQuery = () => async (
+  { body, variables }: { body: string; variables?: any },
+  { getState }: any,
+) => {
+  try {
+    const state = getState();
+    const token = state.auth?.token;
+    if (token) {
+      client.setHeader('authorization', `Bearer ${token}`);
+    } else {
+      client.setHeader('authorization', '');
     }
+    const result = await client.request(body, variables);
+    return { data: result };
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return { error: { status: error.response.status, data: error.response.data } };
+    }
+    return { error: { status: 500, data: String(error) } };
   }
+};
 
 export const api = createApi({
   reducerPath: 'api',
@@ -142,7 +143,7 @@ export const api = createApi({
       providesTags: ['Venta'],
     }),
   }),
-})
+});
 
 export const {
   useLoginMutation,
@@ -151,4 +152,4 @@ export const {
   useGetProductosQuery,
   useCreateVentaMutation,
   useGetVentasQuery,
-} = api
+} = api;

@@ -1,36 +1,42 @@
-import { Stack } from 'expo-router'
-import { TamaguiProvider } from 'tamagui'
-import { Provider } from 'react-redux'
-import tamaguiConfig from '../../tamagui.config'
-import { store } from '../store'
-import { useFonts } from 'expo-font'
-import { useEffect } from 'react'
-import * as SplashScreen from 'expo-splash-screen'
-import { registerForPushNotificationsAsync } from '../utils/notifications'
+import { Stack } from 'expo-router';
+import { TamaguiProvider } from 'tamagui';
+import { Provider } from 'react-redux';
+import { useFonts } from 'expo-font';
+import { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import interMedium from '@tamagui/font-inter/otf/Inter-Medium.otf';
+import interBold from '@tamagui/font-inter/otf/Inter-Bold.otf';
+import { store } from '../store';
+import { tamaguiConfig } from '../../tamagui.config';
+import { registerForPushNotificationsAsync } from '../utils/notifications';
 
-SplashScreen.preventAutoHideAsync()
+// @ts-ignore
+// @ts-ignore
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
-    InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
-  })
+    Inter: interMedium,
+    InterBold: interBold,
+  });
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync()
+      SplashScreen.hideAsync();
 
       // Request push notification permissions and fetch token
       registerForPushNotificationsAsync().then((token) => {
         if (token) {
           // You could dispatch this to Redux if needed
-          console.log('Push notification setup complete.')
+          // eslint-disable-next-line no-console
+          console.log('Push notification setup complete.');
         }
-      })
+      });
     }
-  }, [loaded])
+  }, [loaded]);
 
-  if (!loaded) return null
+  if (!loaded) return null;
 
   return (
     <Provider store={store}>
@@ -44,5 +50,5 @@ export default function RootLayout() {
         </Stack>
       </TamaguiProvider>
     </Provider>
-  )
+  );
 }

@@ -1,65 +1,76 @@
-import { router } from 'expo-router'
-import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
-import { Alert, Image as RNImage } from 'react-native'
-import { useDispatch } from 'react-redux'
-import { Button, Input, SizableText, Spinner, YStack } from 'tamagui'
-import { useLoginMutation } from '../store/api'
-import { setToken } from '../store/authSlice'
+import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from 'react';
+import { Alert, Image as RNImage } from 'react-native';
+import { useDispatch } from 'react-redux';
+import {
+  Button, Input, SizableText, Spinner, YStack,
+} from 'tamagui';
+import { useLoginMutation } from '../store/api';
+import { setToken } from '../store/authSlice';
+
+// @ts-ignore
+import titleImg from '../../assets/images/title.png';
+
+function LoadingSpinner() {
+  return <Spinner color="white" />;
+}
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [login, { isLoading }] = useLoginMutation()
-  const dispatch = useDispatch()
-  const [isCheckingToken, setIsCheckingToken] = useState(true)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch();
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
 
   useEffect(() => {
     const checkToken = async () => {
       try {
-        const storedToken = await SecureStore.getItemAsync('token')
+        const storedToken = await SecureStore.getItemAsync('token');
         if (storedToken) {
-          dispatch(setToken(storedToken))
-          router.replace('/(tabs)/store')
+          dispatch(setToken(storedToken));
+          router.replace('/(tabs)/store');
         }
       } catch (e) {
-        console.error('Error reading token', e)
+        // eslint-disable-next-line no-console
+        console.error('Error reading token', e);
       } finally {
-        setIsCheckingToken(false)
+        setIsCheckingToken(false);
       }
-    }
-    checkToken()
-  }, [dispatch])
+    };
+    checkToken();
+  }, [dispatch]);
 
   const handleLogin = async () => {
     try {
-      const response = await login({ correo_electronico: email, contrasena: password }).unwrap()
+      const response = await login({ correo_electronico: email, contrasena: password }).unwrap();
       if (response.login?.access_token) {
-        const token = response.login.access_token
-        await SecureStore.setItemAsync('token', token)
-        dispatch(setToken(token))
-        router.replace('/(tabs)/store')
+        const token = response.login.access_token;
+        await SecureStore.setItemAsync('token', token);
+        dispatch(setToken(token));
+        router.replace('/(tabs)/store');
       } else {
-        Alert.alert('Error', 'Invalid credentials')
+        Alert.alert('Error', 'Invalid credentials');
       }
     } catch (err) {
-      console.error(err)
-      Alert.alert('Error', 'Network or server error during login')
+      // eslint-disable-next-line no-console
+      console.error(err);
+      Alert.alert('Error', 'Network or server error during login');
     }
-  }
+  };
 
   if (isCheckingToken) {
     return (
       <YStack f={1} jc="center" ai="center" bg="$background">
         <SizableText>Cargando...</SizableText>
       </YStack>
-    )
+    );
   }
 
   return (
     <YStack f={1} jc="center" ai="center" p="$4" gap="$4" bg="$background">
       <RNImage
-        source={require('../../assets/images/title.png')}
+        source={titleImg}
         style={{ width: 300, height: 100, resizeMode: 'contain' }}
       />
       <SizableText size="$4" color="$colorHover" mb="$4">
@@ -90,7 +101,7 @@ export default function LoginScreen() {
           color="white"
           hoverStyle={{ bg: '$colorHover' }}
           pressStyle={{ bg: '$colorPress' }}
-          icon={isLoading ? () => <Spinner color="white" /> : undefined}
+          icon={isLoading ? LoadingSpinner : undefined}
         >
           {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
         </Button>
@@ -99,5 +110,5 @@ export default function LoginScreen() {
         </Button>
       </YStack>
     </YStack>
-  )
+  );
 }
