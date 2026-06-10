@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import { YStack, XStack, Input, Button, Text, SizableText, Image, Spinner } from 'tamagui'
 import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useState } from 'react'
+import { Alert, Image as RNImage } from 'react-native'
+import { useDispatch } from 'react-redux'
+import { Button, Input, SizableText, Spinner, YStack } from 'tamagui'
 import { useLoginMutation } from '../store/api'
 import { setToken } from '../store/authSlice'
-import { useDispatch } from 'react-redux'
-import { Alert, Image as RNImage } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('')
@@ -58,9 +58,9 @@ export default function LoginScreen() {
 
   return (
     <YStack f={1} jc="center" ai="center" p="$4" gap="$4" bg="$background">
-      <RNImage 
-        source={require('../../assets/images/title.png')} 
-        style={{ width: 300, height: 100, resizeMode: 'contain' }} 
+      <RNImage
+        source={require('../../assets/images/title.png')}
+        style={{ width: 300, height: 100, resizeMode: 'contain' }}
       />
       <SizableText size="$4" color="$colorHover" mb="$4">
         Inicia sesión para continuar
@@ -94,11 +94,7 @@ export default function LoginScreen() {
         >
           {isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
         </Button>
-        <Button
-          mt="$2"
-          chromeless
-          onPress={() => router.push('/register')}
-        >
+        <Button mt="$2" chromeless onPress={() => router.push('/register')}>
           ¿No tienes una cuenta? ¡Crea una!
         </Button>
       </YStack>

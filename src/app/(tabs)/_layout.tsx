@@ -1,25 +1,22 @@
-import React, { useEffect } from 'react'
-import { Tabs } from 'expo-router'
-import { ShoppingBag, Clock, ShoppingCart, LogOut } from 'lucide-react-native'
-import { useTheme, Button } from 'tamagui'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '../../store'
-import { router } from 'expo-router'
 import * as Location from 'expo-location'
-import { useGetSucursalesQuery } from '../../store/api'
-import { setSucursal } from '../../store/cartSlice'
-import { setToken } from '../../store/authSlice'
-import * as SecureStore from 'expo-secure-store'
 import * as Notifications from 'expo-notifications'
+import { router, Tabs } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { Clock, LogOut, ShoppingBag, ShoppingCart } from 'lucide-react-native'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Button, useTheme } from 'tamagui'
+import { RootState } from '../../store'
+import { useGetSucursalesQuery } from '../../store/api'
+import { setToken } from '../../store/authSlice'
+import { setSucursal } from '../../store/cartSlice'
 
 // Haversine distance formula
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const p = 0.017453292519943295
   const c = Math.cos
   const a =
-    0.5 -
-    c((lat2 - lat1) * p) / 2 +
-    (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2
+    0.5 - c((lat2 - lat1) * p) / 2 + (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2
   return 12742 * Math.asin(Math.sqrt(a))
 }
 
@@ -44,7 +41,7 @@ export default function TabsLayout() {
   }
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       // If the user already has a selected pharmacy, don't overwrite it with GPS
       if (currentSucursalId) return
 
@@ -63,7 +60,7 @@ export default function TabsLayout() {
                 loc.coords.latitude,
                 loc.coords.longitude,
                 suc.latitud,
-                suc.longitud
+                suc.longitud,
               )
               if (dist < minDistance) {
                 minDistance = dist
@@ -77,7 +74,7 @@ export default function TabsLayout() {
           }
         }
       } catch (e) {
-        // Ignored
+        console.error(e)
       }
     })()
   }, [sucursalesData, currentSucursalId, dispatch])
@@ -116,12 +113,7 @@ export default function TabsLayout() {
           title: 'Tienda',
           tabBarIcon: ({ color }) => <ShoppingBag color={color as string} />,
           headerRight: () => (
-            <Button 
-              mr="$4" 
-              size="$3" 
-              icon={ShoppingCart} 
-              onPress={() => router.push('/cart')}
-            >
+            <Button mr="$4" size="$3" icon={ShoppingCart} onPress={() => router.push('/cart')}>
               {count > 0 ? count.toString() : undefined}
             </Button>
           ),

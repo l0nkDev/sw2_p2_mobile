@@ -10,8 +10,7 @@ export const store = configureStore({
     auth: authReducer,
     cart: cartReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 })
 
 setupListeners(store.dispatch)

@@ -18,7 +18,7 @@ export default function HistoryScreen() {
           <SizableText size="$6" fontWeight="bold" color="$color" mb="$2">
             Tus Pedidos
           </SizableText>
-          
+
           {isLoading ? (
             <YStack p="$4" ai="center">
               <Spinner size="large" color="$color" />
@@ -26,29 +26,35 @@ export default function HistoryScreen() {
           ) : ventas.length > 0 ? (
             ventas.map((venta: any, index: number) => {
               const sucursal = sucursales.find((s: any) => s.id === venta.sucursal_id)
-              
+
               return (
                 <Card key={venta.id} borderWidth={1} borderColor="$borderColor" p="$3" bg="white">
                   <YStack gap="$2">
                     <XStack jc="space-between" ai="center">
-                      <SizableText size="$5" fontWeight="bold">Orden #{venta.id}</SizableText>
+                      <SizableText size="$5" fontWeight="bold">
+                        Orden #{venta.id}
+                      </SizableText>
                       <SizableText color="$colorHover">${venta.total.toFixed(2)}</SizableText>
                     </XStack>
-                    
+
                     <XStack jc="space-between" ai="center">
                       <SizableText color="$colorHover" size="$3">
-                        {new Date(venta.fecha_venta).toLocaleDateString('es-BO', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        {new Date(venta.fecha_venta).toLocaleDateString('es-BO', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
                       </SizableText>
-                      
-                      <YStack 
-                        bg={venta.estado === 'PENDIENTE' ? '$yellow4' : '$green4'} 
-                        px="$2" 
-                        py="$1" 
+
+                      <YStack
+                        bg={venta.estado === 'PENDIENTE' ? '$yellow4' : '$green4'}
+                        px="$2"
+                        py="$1"
                         borderRadius="$4"
                       >
-                        <SizableText 
-                          size="$2" 
-                          fontWeight="bold" 
+                        <SizableText
+                          size="$2"
+                          fontWeight="bold"
                           color={venta.estado === 'PENDIENTE' ? '$yellow10' : '$green10'}
                         >
                           {venta.estado}
@@ -61,8 +67,8 @@ export default function HistoryScreen() {
                         <SizableText size="$3" color="$color">
                           Farmacia: {sucursal.nombre}
                         </SizableText>
-                        <Button 
-                          size="$2" 
+                        <Button
+                          size="$2"
                           icon={MapPin}
                           bg="$color"
                           color="white"
@@ -79,7 +85,9 @@ export default function HistoryScreen() {
                         <SizableText>
                           {detalle.cantidad}x {detalle.producto_nombre}
                         </SizableText>
-                        <SizableText color="$colorHover">Bs. {detalle.subtotal.toFixed(2)}</SizableText>
+                        <SizableText color="$colorHover">
+                          Bs. {detalle.subtotal.toFixed(2)}
+                        </SizableText>
                       </XStack>
                     ))}
                   </YStack>

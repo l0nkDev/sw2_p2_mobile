@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { YStack, SizableText, Spinner, Sheet, ScrollView, XStack, Button, Separator } from 'tamagui'
-import { Platform } from 'react-native'
 import * as Location from 'expo-location'
-import { useGetSucursalesQuery } from '../store/api'
-import { useSelector, useDispatch } from 'react-redux'
-import { RootState } from '../store'
-import { setSucursal } from '../store/cartSlice'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { MapPin, ChevronUp, Check } from 'lucide-react-native'
+import { Check, ChevronUp, MapPin } from 'lucide-react-native'
+import { useEffect, useState } from 'react'
+import { Platform } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { Button, ScrollView, Sheet, SizableText, Spinner, XStack, YStack } from 'tamagui'
+import { RootState } from '../store'
+import { useGetSucursalesQuery } from '../store/api'
+import { setSucursal } from '../store/cartSlice'
 
 let MapView: any = null
 let Marker: any = null
@@ -22,7 +22,7 @@ export default function MapScreen() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const { focusSucursalId } = useLocalSearchParams()
-  
+
   const { data: sucursalesData, isLoading: isLoadingSucursales } = useGetSucursalesQuery({})
   const currentSucursalId = useSelector((state: RootState) => state.cart.sucursalId)
   const dispatch = useDispatch()
@@ -32,12 +32,12 @@ export default function MapScreen() {
   const focusedSucursal = sucursalesData?.sucursales?.find((s: any) => s.id === focusId)
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
         const loc = await Location.getCurrentPositionAsync({})
         setLocation(loc)
       } catch (e) {
-        // Just ignore if we can't get current location
+        console.error(e)
       }
     })()
   }, [])
@@ -55,7 +55,9 @@ export default function MapScreen() {
     return (
       <YStack f={1} jc="center" ai="center" bg="$background">
         <Spinner size="large" color="$color" />
-        <SizableText mt="$2" color="$colorHover">Cargando mapa...</SizableText>
+        <SizableText mt="$2" color="$colorHover">
+          Cargando mapa...
+        </SizableText>
       </YStack>
     )
   }
@@ -119,7 +121,7 @@ export default function MapScreen() {
         snapPoints={[50, 85]}
         dismissOnSnapToBottom
       >
-        <Sheet.Overlay animation="lazy" enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
+        <Sheet.Overlay />
         <Sheet.Handle />
         <Sheet.Frame p="$4" bg="$background">
           <XStack jc="center" mb="$4">
@@ -127,7 +129,7 @@ export default function MapScreen() {
               Seleccionar Farmacia
             </SizableText>
           </XStack>
-          
+
           <ScrollView>
             <YStack gap="$2">
               {sucursalesData?.sucursales?.map((suc: any) => {
@@ -146,7 +148,10 @@ export default function MapScreen() {
                     mb="$2"
                   >
                     <YStack>
-                      <SizableText fontWeight={isSelected ? 'bold' : 'normal'} color={isSelected ? 'white' : '$color'}>
+                      <SizableText
+                        fontWeight={isSelected ? 'bold' : 'normal'}
+                        color={isSelected ? 'white' : '$color'}
+                      >
                         {suc.nombre}
                       </SizableText>
                       <SizableText size="$2" color={isSelected ? 'white' : '$colorHover'}>

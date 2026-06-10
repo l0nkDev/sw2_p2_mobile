@@ -19,14 +19,14 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync()
-      
+
       // Request push notification permissions and fetch token
-      registerForPushNotificationsAsync().then(token => {
+      registerForPushNotificationsAsync().then((token) => {
         if (token) {
           // You could dispatch this to Redux if needed
-          console.log('Push notification setup complete.');
+          console.log('Push notification setup complete.')
         }
-      });
+      })
     }
   }, [loaded])
 

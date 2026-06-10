@@ -1,4 +1,5 @@
 import { config } from '@tamagui/config/v3'
+import { shorthands } from '@tamagui/shorthands'
 import { createTamagui } from 'tamagui'
 
 const mintGreen = {
@@ -16,6 +17,12 @@ const mintGreen = {
 
 export const tamaguiConfig = createTamagui({
   ...config,
+  shorthands: {
+    ...shorthands,
+    ml: 'marginLeft',
+    mr: 'marginRight',
+    col: 'color',
+  } as const,
   themes: {
     ...config.themes,
     light_pastelBlue: {

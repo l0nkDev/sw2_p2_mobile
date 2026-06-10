@@ -1,8 +1,6 @@
 module.exports = {
-  extends: ["expo", "prettier"],
-  plugins: ["prettier"],
+  extends: ['expo'],
   rules: {
-    "prettier/prettier": "error",
-    "react-native/no-inline-styles": "off",
+    'react-native/no-inline-styles': 'off',
   },
 };

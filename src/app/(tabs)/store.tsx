@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { YStack, ScrollView, SizableText, Input, XStack, Button, Spinner, Card } from 'tamagui'
-import { Search, MapPin, Mic, MicOff, Camera as CameraIcon } from 'lucide-react-native'
-import { useSelector, useDispatch } from 'react-redux'
+import { router } from 'expo-router'
+import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition'
+import { Camera as CameraIcon, MapPin, Mic, MicOff, Search } from 'lucide-react-native'
+import React, { useState } from 'react'
+import { Platform } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { Button, Card, Input, ScrollView, SizableText, Spinner, XStack, YStack } from 'tamagui'
 import { RootState } from '../../store'
 import { useGetProductosQuery, useGetSucursalesQuery } from '../../store/api'
 import { addItem, setSucursal } from '../../store/cartSlice'
-import { router } from 'expo-router'
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition'
-import { Platform } from 'react-native'
 
 export default function StorefrontScreen() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -24,10 +24,10 @@ export default function StorefrontScreen() {
       dispatch(setSucursal(sucursalesData.sucursales[0].id))
     }
   }, [sucursalId, sucursalesData, dispatch])
-  
+
   const { data, isLoading } = useGetProductosQuery(
     { sucursalId: sucursalId! },
-    { skip: !sucursalId }
+    { skip: !sucursalId },
   )
 
   const handleAddToCart = (producto: any) => {
@@ -36,7 +36,7 @@ export default function StorefrontScreen() {
         productoId: producto.id,
         nombre: producto.nombre,
         precio: producto.precio_venta,
-      })
+      }),
     )
   }
 
@@ -67,8 +67,8 @@ export default function StorefrontScreen() {
   }
 
   const productos = data?.productos || []
-  const filteredProducts = productos.filter((p: any) => 
-    p.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = productos.filter((p: any) =>
+    p.nombre.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
   return (
@@ -119,11 +119,13 @@ export default function StorefrontScreen() {
             <SizableText size="$6" fontWeight="bold" color="$color">
               Productos Destacados
             </SizableText>
-            
+
             {!sucursalId ? (
               <YStack p="$4" ai="center">
                 <Spinner size="large" color="$color" />
-                <SizableText mt="$2" color="$colorHover">Cargando farmacia...</SizableText>
+                <SizableText mt="$2" color="$colorHover">
+                  Cargando farmacia...
+                </SizableText>
               </YStack>
             ) : isLoading ? (
               <YStack p="$4" ai="center">
@@ -133,15 +135,17 @@ export default function StorefrontScreen() {
               filteredProducts.map((p: any) => (
                 <Card key={p.id} borderWidth={1} borderColor="$borderColor" p="$3" bg="white">
                   <YStack gap="$2">
-                    <SizableText size="$5" fontWeight="bold">{p.nombre}</SizableText>
+                    <SizableText size="$5" fontWeight="bold">
+                      {p.nombre}
+                    </SizableText>
                     <XStack jc="space-between" ai="center">
                       <SizableText color="$colorHover">Bs. {p.precio_venta.toFixed(2)}</SizableText>
                       <SizableText color="$colorHover">Stock: {p.stock_actual}</SizableText>
                     </XStack>
-                    <Button 
-                      mt="$2" 
-                      bg="$color" 
-                      color="white" 
+                    <Button
+                      mt="$2"
+                      bg="$color"
+                      color="white"
                       onPress={() => handleAddToCart(p)}
                       disabled={p.stock_actual <= 0}
                     >

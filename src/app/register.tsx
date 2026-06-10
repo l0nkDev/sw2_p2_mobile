@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
-import { YStack, XStack, Input, Button, SizableText, ScrollView, Spinner } from 'tamagui'
 import { router } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { useState } from 'react'
+import { Alert } from 'react-native'
+import { useDispatch } from 'react-redux'
+import { Button, Input, ScrollView, SizableText, Spinner, YStack } from 'tamagui'
 import { useRegisterMutation } from '../store/api'
 import { setToken } from '../store/authSlice'
-import { useDispatch } from 'react-redux'
-import { Alert } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
 
 export default function RegisterScreen() {
   const [form, setForm] = useState({
@@ -16,12 +16,18 @@ export default function RegisterScreen() {
     contrasena: '',
     celular: '',
   })
-  
+
   const [register, { isLoading }] = useRegisterMutation()
   const dispatch = useDispatch()
 
   const handleRegister = async () => {
-    if (!form.nombre || !form.apellido || !form.correo_electronico || !form.contrasena || !form.nombre_usuario) {
+    if (
+      !form.nombre ||
+      !form.apellido ||
+      !form.correo_electronico ||
+      !form.contrasena ||
+      !form.nombre_usuario
+    ) {
       Alert.alert('Error', 'Please fill in all required fields')
       return
     }
@@ -94,7 +100,7 @@ export default function RegisterScreen() {
             onChangeText={(text) => setForm({ ...form, contrasena: text })}
             secureTextEntry
           />
-          
+
           <Button
             onPress={handleRegister}
             disabled={isLoading}
@@ -107,12 +113,8 @@ export default function RegisterScreen() {
           >
             {isLoading ? 'Creating account...' : 'Register'}
           </Button>
-          
-          <Button
-            mt="$2"
-            chromeless
-            onPress={() => router.back()}
-          >
+
+          <Button mt="$2" chromeless onPress={() => router.back()}>
             Already have an account? Log in
           </Button>
         </YStack>
