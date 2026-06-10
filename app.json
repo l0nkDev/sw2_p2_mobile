@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "sw2_p2_mobile",
+    "name": "PharmaFICCT",
     "slug": "sw2_p2_mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,12 @@
     "scheme": "sw2p2mobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Permite a la aplicación reconocer tu voz para buscar productos.",
+        "NSMicrophoneUsageDescription": "Permite a la aplicación grabar tu voz para buscar productos."
+      },
+      "bundleIdentifier": "com.l0nkdev.sw2-p2-mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,11 +24,15 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.l0nkdev.sw2_p2_mobile",
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
-          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+          "apiKey": "AIzaSyAEOW6D1qBg3Pmy-OmL2kwhsqYoQ3498wo"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -40,11 +49,32 @@
             "imageWidth": 76
           }
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Permite a la aplicación grabar tu voz para buscar productos.",
+          "speechRecognitionPermission": "Permite a la aplicación reconocer tu voz para buscar productos."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite a la aplicación usar la cámara para escanear recetas."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#208AEF"
+        }
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": false,
+      "reactCompiler": false
     },
     "extra": {
       "router": {},

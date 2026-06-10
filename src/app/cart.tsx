@@ -26,24 +26,24 @@ export default function CartScreen() {
       
       await createVenta({ sucursalId, detalles }).unwrap()
       
-      Alert.alert('Success', 'Order created successfully!')
+      Alert.alert('Success', 'Orden creada exitosamente!')
       dispatch(clearCart())
       router.back()
     } catch (err) {
       console.error(err)
-      Alert.alert('Error', 'Failed to create order')
+      Alert.alert('Error', 'Fallo al crear la orden')
     }
   }
 
   return (
     <YStack f={1} bg="$background" p="$4">
       <SizableText size="$8" fontWeight="bold" color="$color" mb="$4">
-        Your Cart
+        Tu Carrito
       </SizableText>
       
       <ScrollView f={1}>
         {cartItems.length === 0 ? (
-          <SizableText color="$colorHover">Your cart is empty.</SizableText>
+          <SizableText color="$colorHover">Tu carrito esta vacio.</SizableText>
         ) : (
           <YStack gap="$3">
             {cartItems.map((item) => (
@@ -52,11 +52,11 @@ export default function CartScreen() {
                   <YStack f={1}>
                     <SizableText fontWeight="bold" numberOfLines={1}>{item.nombre}</SizableText>
                     <SizableText color="$colorHover">
-                      {item.cantidad} x ${item.precio.toFixed(2)}
+                      {item.cantidad} x Bs. {item.precio.toFixed(2)}
                     </SizableText>
                   </YStack>
                   <Button size="$3" theme="red_active" onPress={() => dispatch(removeItem(item.productoId))}>
-                    Remove
+                    Quitar
                   </Button>
                 </XStack>
               </Card>
@@ -70,7 +70,7 @@ export default function CartScreen() {
           <XStack jc="space-between" mb="$4">
             <SizableText size="$6" fontWeight="bold">Total:</SizableText>
             <SizableText size="$6" fontWeight="bold" color="$color">
-              ${total.toFixed(2)}
+              Bs.{total.toFixed(2)}
             </SizableText>
           </XStack>
           <Button 
@@ -79,7 +79,7 @@ export default function CartScreen() {
             onPress={handleCheckout}
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : 'Checkout'}
+            {isLoading ? 'Procesando...' : 'Finalizar pedido'}
           </Button>
         </YStack>
       )}

@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { request, ClientError, GraphQLClient } from 'graphql-request'
 
 const client = new GraphQLClient('https://pharmacy.lonk.dev/graphql')
+// const client = new GraphQLClient('http://10.5.205.211:3000/graphql')
 
 const graphqlBaseQuery =
   () =>
@@ -42,6 +43,18 @@ export const api = createApi({
           }
         `,
         variables,
+      }),
+    }),
+    register: builder.mutation({
+      query: (variables: { nombre: string; apellido: string; correo_electronico: string; nombre_usuario: string; contrasena: string; celular?: string }) => ({
+        body: `
+          mutation Register($input: RegisterDto!) {
+            register(input: $input) {
+              access_token
+            }
+          }
+        `,
+        variables: { input: variables },
       }),
     }),
     getSucursales: builder.query({
@@ -94,7 +107,31 @@ export const api = createApi({
       }),
       invalidatesTags: ['Producto', 'Venta'],
     }),
+    getVentas: builder.query({
+      query: () => ({
+        body: `
+          query GetVentas {
+            ventas {
+              id
+              numero_venta
+              fecha_venta
+              estado
+              sucursal_id
+              total
+              detalles {
+                id
+                producto_nombre
+                cantidad
+                precio_unitario
+                subtotal
+              }
+            }
+          }
+        `,
+      }),
+      providesTags: ['Venta'],
+    }),
   }),
 })
 
-export const { useLoginMutation, useGetSucursalesQuery, useGetProductosQuery, useCreateVentaMutation } = api
+export const { useLoginMutation, useRegisterMutation, useGetSucursalesQuery, useGetProductosQuery, useCreateVentaMutation, useGetVentasQuery } = api
