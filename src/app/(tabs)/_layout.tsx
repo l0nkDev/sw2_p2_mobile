@@ -22,7 +22,7 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   return 12742 * Math.asin(Math.sqrt(a));
 }
 
-function HeaderLeftButton() {
+function HeaderRightLogout() {
   const dispatch = useDispatch();
   const handleLogout = async () => {
     try {
@@ -38,22 +38,22 @@ function HeaderLeftButton() {
 
   return (
     <Button
-      ml="$4"
-      size="$3"
+      mr="$4"
+      size="$4"
       chromeless
-      icon={LogOut}
+      icon={<LogOut size={24} />}
       onPress={handleLogout}
       color="#ef4444"
     />
   );
 }
 
-function HeaderRightCart() {
+function HeaderLeftCart() {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const count = cartItems.reduce((acc, item) => acc + item.cantidad, 0);
 
   return (
-    <Button mr="$4" size="$3" icon={ShoppingCart} onPress={() => router.push('/cart')}>
+    <Button ml="$4" size="$4" icon={<ShoppingCart size={24} />} onPress={() => router.push('/cart')}>
       {count > 0 ? count.toString() : undefined}
     </Button>
   );
@@ -128,7 +128,7 @@ export default function TabsLayout() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        headerLeft: HeaderLeftButton,
+        headerRight: HeaderRightLogout,
       }}
     >
       <Tabs.Screen
@@ -136,7 +136,7 @@ export default function TabsLayout() {
         options={{
           title: 'Tienda',
           tabBarIcon: StoreTabBarIcon,
-          headerRight: HeaderRightCart,
+          headerLeft: HeaderLeftCart,
         }}
       />
       <Tabs.Screen

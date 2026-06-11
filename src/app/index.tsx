@@ -1,3 +1,5 @@
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
@@ -43,7 +45,31 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const response = await login({ correo_electronico: email, contrasena: password }).unwrap();
+      let pushToken;
+
+      if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus === 'granted') {
+          try {
+            const tokenData = await Notifications.getExpoPushTokenAsync();
+            pushToken = tokenData.data;
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+          }
+        }
+      }
+
+      const response = await login({
+        correo_electronico: email,
+        contrasena: password,
+        notification_token: pushToken,
+      }).unwrap();
       if (response.login?.access_token) {
         const token = response.login.access_token;
         await SecureStore.setItemAsync('token', token);
@@ -69,10 +95,7 @@ export default function LoginScreen() {
 
   return (
     <YStack f={1} jc="center" ai="center" p="$4" gap="$4" bg="$background">
-      <RNImage
-        source={titleImg}
-        style={{ width: 300, height: 100, resizeMode: 'contain' }}
-      />
+      <RNImage source={titleImg} style={{ width: 300, height: 100, resizeMode: 'contain' }} />
       <SizableText size="$4" color="$colorHover" mb="$4">
         Inicia sesión para continuar
       </SizableText>

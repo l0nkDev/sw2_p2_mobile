@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { TamaguiProvider } from 'tamagui';
+import { PortalProvider, TamaguiProvider } from 'tamagui';
 import { Provider } from 'react-redux';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
@@ -41,13 +41,16 @@ export default function RootLayout() {
   return (
     <Provider store={store}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light_pastelBlue">
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="scanner" options={{ headerShown: false }} />
-          <Stack.Screen name="map" options={{ presentation: 'modal', headerShown: false }} />
-          <Stack.Screen name="cart" options={{ presentation: 'modal', title: 'Carrito' }} />
-        </Stack>
+        <PortalProvider shouldAddRootHost>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="register" options={{ headerShown: false }} />
+            <Stack.Screen name="scanner" options={{ presentation: 'transparentModal', headerShown: false }} />
+            <Stack.Screen name="map" options={{ presentation: 'transparentModal', headerShown: false }} />
+            <Stack.Screen name="cart" options={{ presentation: 'modal', title: 'Carrito' }} />
+          </Stack>
+        </PortalProvider>
       </TamaguiProvider>
     </Provider>
   );

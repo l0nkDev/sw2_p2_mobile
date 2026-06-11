@@ -2,12 +2,9 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { ClientError, GraphQLClient } from 'graphql-request';
 
 const client = new GraphQLClient('https://pharmacy.lonk.dev/graphql');
-// const client = new GraphQLClient('http://10.5.205.211:3000/graphql')
+// const client = new GraphQLClient('http://192.168.0.27:3000/graphql')
 
-const graphqlBaseQuery = () => async (
-  { body, variables }: { body: string; variables?: any },
-  { getState }: any,
-) => {
+const graphqlBaseQuery = () => async ({ body, variables }: { body: string; variables?: any }, { getState }: any) => {
   try {
     const state = getState();
     const token = state.auth?.token;
@@ -32,12 +29,18 @@ export const api = createApi({
   tagTypes: ['Producto', 'Sucursal', 'Venta'],
   endpoints: (builder) => ({
     login: builder.mutation({
-      query: (variables: { correo_electronico: string; contrasena: string }) => ({
+      query: (variables: {
+        correo_electronico: string
+        contrasena: string
+        notification_token?: string
+      }) => ({
         body: `
-          mutation Login($correo_electronico: String!, $contrasena: String!) {
+          mutation Login($correo_electronico: String!, $contrasena: String!, $notification_token: String) {
             login(input: {
               correo_electronico: $correo_electronico
               contrasena: $contrasena
+              notification_token: $notification_token
+              is_mobile: true
             }) {
               access_token
             }
@@ -54,10 +57,11 @@ export const api = createApi({
         nombre_usuario: string
         contrasena: string
         celular?: string
+        notification_token?: string
       }) => ({
         body: `
-          mutation Register($input: RegisterDto!) {
-            register(input: $input) {
+          mutation RegisterCliente($input: RegisterClienteDto!) {
+            registerCliente(input: $input) {
               access_token
             }
           }

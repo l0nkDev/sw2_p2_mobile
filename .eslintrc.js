@@ -1,6 +1,6 @@
 module.exports = {
   ignorePatterns: ['scripts/*', '*.js'],
-  extends: ['airbnb', 'airbnb-typescript', 'expo'],
+  extends: ['airbnb', 'airbnb-typescript', 'expo', 'prettier'],
   parserOptions: {
     project: './tsconfig.json',
   },

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { RefreshControl } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import {
   YStack, ScrollView, SizableText, Spinner, Card, XStack, Separator, Button,
 } from 'tamagui';
@@ -7,8 +9,17 @@ import { router } from 'expo-router';
 import { useGetVentasQuery, useGetSucursalesQuery } from '../../store/api';
 
 export default function HistoryScreen() {
-  const { data, isLoading } = useGetVentasQuery({});
+  const {
+    data, isLoading, isFetching, refetch,
+  } = useGetVentasQuery({});
   const { data: sucursalesData } = useGetSucursalesQuery({});
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(() => {
+      refetch();
+    });
+    return () => subscription.remove();
+  }, [refetch]);
 
   const ventas = data?.ventas || [];
   const sucursales = sucursalesData?.sucursales || [];
@@ -49,20 +60,35 @@ export default function HistoryScreen() {
                   })}
                 </SizableText>
 
-                <YStack
-                  bg={venta.estado === 'PENDIENTE' ? '$yellow4' : '$green4'}
-                  px="$2"
-                  py="$1"
-                  borderRadius="$4"
-                >
-                  <SizableText
-                    size="$2"
-                    fontWeight="bold"
-                    color={venta.estado === 'PENDIENTE' ? '$yellow10' : '$green10'}
-                  >
-                    {venta.estado}
-                  </SizableText>
-                </YStack>
+                {(() => {
+                  const getStatusColors = (estado: string) => {
+                    switch (estado) {
+                      case 'PENDIENTE': return { bg: '$yellow4', text: '$yellow10' };
+                      case 'PREPARADA': return { bg: '$blue4', text: '$blue10' };
+                      case 'COMPLETADA': return { bg: '$green4', text: '$green10' };
+                      case 'RECHAZADA': return { bg: '$red4', text: '$red10' };
+                      default: return { bg: '$gray4', text: '$gray10' };
+                    }
+                  };
+                  const colors = getStatusColors(venta.estado);
+
+                  return (
+                    <YStack
+                      bg={colors.bg}
+                      px="$2"
+                      py="$1"
+                      borderRadius="$4"
+                    >
+                      <SizableText
+                        size="$2"
+                        fontWeight="bold"
+                        color={colors.text}
+                      >
+                        {venta.estado}
+                      </SizableText>
+                    </YStack>
+                  );
+                })()}
               </XStack>
 
               {sucursal && (
@@ -112,7 +138,11 @@ export default function HistoryScreen() {
 
   return (
     <YStack f={1} bg="$background" p="$4">
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} />
+        }
+      >
         <YStack gap="$3">
           <SizableText size="$6" fontWeight="bold" color="$color" mb="$2">
             Tus Pedidos

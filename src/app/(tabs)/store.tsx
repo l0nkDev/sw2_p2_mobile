@@ -4,7 +4,7 @@ import {
   Camera as CameraIcon, MapPin, Mic, MicOff, Search,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, RefreshControl } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button, Card, Input, ScrollView, SizableText, Spinner, XStack, YStack,
@@ -14,7 +14,8 @@ import { useGetProductosQuery, useGetSucursalesQuery } from '../../store/api';
 import { addItem, setSucursal } from '../../store/cartSlice';
 
 export default function StorefrontScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [activeSearchQuery, setActiveSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const dispatch = useDispatch();
   const sucursalId = useSelector((state: RootState) => state.cart.sucursalId);
@@ -29,7 +30,9 @@ export default function StorefrontScreen() {
     }
   }, [sucursalId, sucursalesData, dispatch]);
 
-  const { data, isLoading } = useGetProductosQuery(
+  const {
+    data, isLoading, isFetching, refetch,
+  } = useGetProductosQuery(
     { sucursalId: sucursalId! },
     { skip: !sucursalId },
   );
@@ -49,7 +52,8 @@ export default function StorefrontScreen() {
   useSpeechRecognitionEvent('result', (event) => {
     const transcript = event.results[0]?.transcript;
     if (transcript) {
-      setSearchQuery(transcript);
+      setSearchInput(transcript);
+      setActiveSearchQuery(transcript);
     }
   });
 
@@ -72,7 +76,7 @@ export default function StorefrontScreen() {
 
   const productos = data?.productos || [];
   const filteredProducts = productos.filter(
-    (p: any) => p.nombre.toLowerCase().includes(searchQuery.toLowerCase()),
+    (p: any) => p.nombre.toLowerCase().includes(activeSearchQuery.toLowerCase()),
   );
 
   const renderContent = () => {
@@ -143,12 +147,12 @@ export default function StorefrontScreen() {
 
       <YStack f={1} p="$4">
         <XStack gap="$2" ai="center" mb="$4">
-          <Input
-            f={1}
-            placeholder="Buscar..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            bg="white"
+          <Button
+            icon={CameraIcon}
+            bg="$color"
+            color="white"
+            onPress={() => router.push('/scanner')}
+            circular
           />
           <Button
             icon={isListening ? MicOff : Mic}
@@ -157,19 +161,28 @@ export default function StorefrontScreen() {
             onPress={handleVoiceSearch}
             circular
           />
+          <Input
+            f={1}
+            placeholder="Buscar..."
+            value={searchInput}
+            onChangeText={setSearchInput}
+            onSubmitEditing={() => setActiveSearchQuery(searchInput)}
+            bg="white"
+          />
           <Button
-            icon={CameraIcon}
+            icon={Search}
             bg="$color"
             color="white"
-            onPress={() => router.push('/scanner')}
             circular
+            onPress={() => setActiveSearchQuery(searchInput)}
           />
-          <Button icon={Search} bg="$color" color="white" hoverStyle={{ bg: '$colorHover' }}>
-            Buscar
-          </Button>
         </XStack>
 
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} />
+          }
+        >
           <YStack gap="$3">
             <SizableText size="$6" fontWeight="bold" color="$color">
               Productos Destacados

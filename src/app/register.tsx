@@ -1,3 +1,5 @@
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
@@ -34,14 +36,34 @@ export default function RegisterScreen() {
       || !form.contrasena
       || !form.nombre_usuario
     ) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      Alert.alert('Error', 'Por favor rellena todos los campos');
       return;
     }
 
     try {
-      const response = await register(form).unwrap();
-      if (response.register?.access_token) {
-        const token = response.register.access_token;
+      let pushToken;
+
+      if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus === 'granted') {
+          try {
+            const tokenData = await Notifications.getExpoPushTokenAsync();
+            pushToken = tokenData.data;
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+          }
+        }
+      }
+
+      const response = await register({ ...form, notification_token: pushToken }).unwrap();
+      if (response.registerCliente?.access_token || response.register?.access_token) {
+        const token = response.registerCliente?.access_token || response.register?.access_token;
         await SecureStore.setItemAsync('token', token);
         dispatch(setToken(token));
         router.replace('/(tabs)/store');
@@ -59,34 +81,34 @@ export default function RegisterScreen() {
     <ScrollView bg="$background">
       <YStack f={1} jc="center" ai="center" p="$4" gap="$4" mt="$8">
         <SizableText size="$9" fontWeight="bold" color="$color">
-          Create Account
+          Regístrate
         </SizableText>
         <SizableText size="$4" color="$colorHover" mb="$4">
-          Join Pharmacy App
+          Únete a PharmaFICCT
         </SizableText>
 
         <YStack w="100%" maxWidth={400} gap="$3">
           <Input
-            placeholder="First Name *"
+            placeholder="Nombre *"
             placeholderTextColor="$colorHover"
             value={form.nombre}
             onChangeText={(text) => setForm({ ...form, nombre: text })}
           />
           <Input
-            placeholder="Last Name *"
+            placeholder="Apellido *"
             placeholderTextColor="$colorHover"
             value={form.apellido}
             onChangeText={(text) => setForm({ ...form, apellido: text })}
           />
           <Input
-            placeholder="Username *"
+            placeholder="Nombre de usuario *"
             placeholderTextColor="$colorHover"
             value={form.nombre_usuario}
             onChangeText={(text) => setForm({ ...form, nombre_usuario: text })}
             autoCapitalize="none"
           />
           <Input
-            placeholder="Email *"
+            placeholder="Correo electrónico *"
             placeholderTextColor="$colorHover"
             value={form.correo_electronico}
             onChangeText={(text) => setForm({ ...form, correo_electronico: text })}
@@ -94,14 +116,14 @@ export default function RegisterScreen() {
             keyboardType="email-address"
           />
           <Input
-            placeholder="Phone Number (Optional)"
+            placeholder="Número de celular (Opcional)"
             placeholderTextColor="$colorHover"
             value={form.celular}
             onChangeText={(text) => setForm({ ...form, celular: text })}
             keyboardType="phone-pad"
           />
           <Input
-            placeholder="Password *"
+            placeholder="Contraseña *"
             placeholderTextColor="$colorHover"
             value={form.contrasena}
             onChangeText={(text) => setForm({ ...form, contrasena: text })}
@@ -118,11 +140,11 @@ export default function RegisterScreen() {
             pressStyle={{ bg: '$colorPress' }}
             icon={isLoading ? LoadingSpinner : undefined}
           >
-            {isLoading ? 'Creating account...' : 'Register'}
+            {isLoading ? 'Creando cuenta...' : 'Registrarse'}
           </Button>
 
           <Button mt="$2" chromeless onPress={() => router.back()}>
-            Already have an account? Log in
+            ¿Ya tienes una cuenta? Inicia sesión
           </Button>
         </YStack>
       </YStack>
