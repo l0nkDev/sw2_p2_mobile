@@ -1,40 +1,38 @@
-import * as Location from 'expo-location';
-import * as Notifications from 'expo-notifications';
-import { router, Tabs } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import {
-  Clock, LogOut, ShoppingBag, ShoppingCart,
-} from 'lucide-react-native';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button, useTheme } from 'tamagui';
-import { RootState } from '../../store';
-import { useGetSucursalesQuery } from '../../store/api';
-import { setToken } from '../../store/authSlice';
-import { setSucursal } from '../../store/cartSlice';
+import * as Location from 'expo-location'
+import * as Notifications from 'expo-notifications'
+import { router, Tabs } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
+import { Clock, LogOut, ShoppingBag, ShoppingCart } from 'lucide-react-native'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Button, useTheme } from 'tamagui'
+import { RootState } from '../../store'
+import { useGetSucursalesQuery } from '../../store/api'
+import { setToken } from '../../store/authSlice'
+import { setSucursal } from '../../store/cartSlice'
 
 // Haversine distance formula
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const p = 0.017453292519943295;
-  const c = Math.cos;
-  const a = 0.5 - c((lat2 - lat1) * p) / 2
-    + (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2;
-  return 12742 * Math.asin(Math.sqrt(a));
+  const p = 0.017453292519943295
+  const c = Math.cos
+  const a =
+    0.5 - c((lat2 - lat1) * p) / 2 + (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2
+  return 12742 * Math.asin(Math.sqrt(a))
 }
 
 function HeaderRightLogout() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
   const handleLogout = async () => {
     try {
-      await Notifications.unregisterForNotificationsAsync();
+      await Notifications.unregisterForNotificationsAsync()
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('Failed to unregister push token on logout', e);
+      console.error('Failed to unregister push token on logout', e)
     }
-    await SecureStore.deleteItemAsync('token');
-    dispatch(setToken(null as any));
-    router.replace('/');
-  };
+    await SecureStore.deleteItemAsync('token')
+    dispatch(setToken(null as any))
+    router.replace('/')
+  }
 
   return (
     <Button
@@ -45,46 +43,51 @@ function HeaderRightLogout() {
       onPress={handleLogout}
       color="#ef4444"
     />
-  );
+  )
 }
 
 function HeaderLeftCart() {
-  const cartItems = useSelector((state: RootState) => state.cart.items);
-  const count = cartItems.reduce((acc, item) => acc + item.cantidad, 0);
+  const cartItems = useSelector((state: RootState) => state.cart.items)
+  const count = cartItems.reduce((acc, item) => acc + item.cantidad, 0)
 
   return (
-    <Button ml="$4" size="$4" icon={<ShoppingCart size={24} />} onPress={() => router.push('/cart')}>
+    <Button
+      ml="$4"
+      size="$4"
+      icon={<ShoppingCart size={24} />}
+      onPress={() => router.push('/cart')}
+    >
       {count > 0 ? count.toString() : undefined}
     </Button>
-  );
+  )
 }
 
 function StoreTabBarIcon({ color }: { color: string }) {
-  return <ShoppingBag color={color} />;
+  return <ShoppingBag color={color} />
 }
 function HistoryTabBarIcon({ color }: { color: string }) {
-  return <Clock color={color} />;
+  return <Clock color={color} />
 }
 
 export default function TabsLayout() {
-  const theme = useTheme();
-  const currentSucursalId = useSelector((state: RootState) => state.cart.sucursalId);
-  const dispatch = useDispatch();
-  const { data: sucursalesData } = useGetSucursalesQuery({});
+  const theme = useTheme()
+  const currentSucursalId = useSelector((state: RootState) => state.cart.sucursalId)
+  const dispatch = useDispatch()
+  const { data: sucursalesData } = useGetSucursalesQuery({})
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       // If the user already has a selected pharmacy, don't overwrite it with GPS
-      if (currentSucursalId) return;
+      if (currentSucursalId) return
 
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') return
 
       try {
-        const loc = await Location.getCurrentPositionAsync({});
+        const loc = await Location.getCurrentPositionAsync({})
         if (sucursalesData?.sucursales?.length > 0) {
-          let closest: any = null;
-          let minDistance = Infinity;
+          let closest: any = null
+          let minDistance = Infinity
 
           sucursalesData.sucursales.forEach((suc: any) => {
             if (suc.latitud && suc.longitud) {
@@ -93,24 +96,24 @@ export default function TabsLayout() {
                 loc.coords.longitude,
                 suc.latitud,
                 suc.longitud,
-              );
+              )
               if (dist < minDistance) {
-                minDistance = dist;
-                closest = suc;
+                minDistance = dist
+                closest = suc
               }
             }
-          });
+          })
 
           if (closest && closest.id !== currentSucursalId) {
-            dispatch(setSucursal(closest.id));
+            dispatch(setSucursal(closest.id))
           }
         }
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error(e);
+        console.error(e)
       }
-    })();
-  }, [sucursalesData, currentSucursalId, dispatch]);
+    })()
+  }, [sucursalesData, currentSucursalId, dispatch])
 
   return (
     <Tabs
@@ -147,5 +150,5 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
-  );
+  )
 }

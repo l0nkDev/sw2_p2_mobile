@@ -1,28 +1,24 @@
-import React, { useEffect } from 'react';
-import { RefreshControl } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import {
-  YStack, ScrollView, SizableText, Spinner, Card, XStack, Separator, Button,
-} from 'tamagui';
-import { MapPin } from 'lucide-react-native';
-import { router } from 'expo-router';
-import { useGetVentasQuery, useGetSucursalesQuery } from '../../store/api';
+import * as Notifications from 'expo-notifications'
+import { router } from 'expo-router'
+import { MapPin } from 'lucide-react-native'
+import { useEffect } from 'react'
+import { RefreshControl } from 'react-native'
+import { Button, Card, ScrollView, Separator, SizableText, Spinner, XStack, YStack } from 'tamagui'
+import { useGetSucursalesQuery, useGetVentasQuery } from '../../store/api'
 
 export default function HistoryScreen() {
-  const {
-    data, isLoading, isFetching, refetch,
-  } = useGetVentasQuery({});
-  const { data: sucursalesData } = useGetSucursalesQuery({});
+  const { data, isLoading, isFetching, refetch } = useGetVentasQuery({})
+  const { data: sucursalesData } = useGetSucursalesQuery({})
 
   useEffect(() => {
     const subscription = Notifications.addNotificationReceivedListener(() => {
-      refetch();
-    });
-    return () => subscription.remove();
-  }, [refetch]);
+      refetch()
+    })
+    return () => subscription.remove()
+  }, [refetch])
 
-  const ventas = data?.ventas || [];
-  const sucursales = sucursalesData?.sucursales || [];
+  const ventas = data?.ventas || []
+  const sucursales = sucursalesData?.sucursales || []
 
   const renderContent = () => {
     if (isLoading) {
@@ -30,25 +26,21 @@ export default function HistoryScreen() {
         <YStack p="$4" ai="center">
           <Spinner size="large" color="$color" />
         </YStack>
-      );
+      )
     }
 
     if (ventas.length > 0) {
       return ventas.map((venta: any) => {
-        const sucursal = sucursales.find((s: any) => s.id === venta.sucursal_id);
+        const sucursal = sucursales.find((s: any) => s.id === venta.sucursal_id)
 
         return (
           <Card key={venta.id} borderWidth={1} borderColor="$borderColor" p="$3" bg="white">
             <YStack gap="$2">
               <XStack jc="space-between" ai="center">
                 <SizableText size="$5" fontWeight="bold">
-                  Orden #
-                  {venta.id}
+                  Orden #{venta.id}
                 </SizableText>
-                <SizableText color="$colorHover">
-                  $
-                  {venta.total.toFixed(2)}
-                </SizableText>
+                <SizableText color="$colorHover">${venta.total.toFixed(2)}</SizableText>
               </XStack>
 
               <XStack jc="space-between" ai="center">
@@ -63,40 +55,34 @@ export default function HistoryScreen() {
                 {(() => {
                   const getStatusColors = (estado: string) => {
                     switch (estado) {
-                      case 'PENDIENTE': return { bg: '$yellow4', text: '$yellow10' };
-                      case 'PREPARADA': return { bg: '$blue4', text: '$blue10' };
-                      case 'COMPLETADA': return { bg: '$green4', text: '$green10' };
-                      case 'RECHAZADA': return { bg: '$red4', text: '$red10' };
-                      default: return { bg: '$gray4', text: '$gray10' };
+                      case 'PENDIENTE':
+                        return { bg: '$yellow4', text: '$yellow10' }
+                      case 'PREPARADA':
+                        return { bg: '$blue4', text: '$blue10' }
+                      case 'CONFIRMADA':
+                        return { bg: '$green4', text: '$green10' }
+                      case 'RECHAZADA':
+                        return { bg: '$red4', text: '$red10' }
+                      default:
+                        return { bg: '$gray4', text: '$gray10' }
                     }
-                  };
-                  const colors = getStatusColors(venta.estado);
+                  }
+                  const colors = getStatusColors(venta.estado)
 
                   return (
-                    <YStack
-                      bg={colors.bg}
-                      px="$2"
-                      py="$1"
-                      borderRadius="$4"
-                    >
-                      <SizableText
-                        size="$2"
-                        fontWeight="bold"
-                        color={colors.text}
-                      >
+                    <YStack bg={colors.bg} px="$2" py="$1" borderRadius="$4">
+                      <SizableText size="$2" fontWeight="bold" color={colors.text}>
                         {venta.estado}
                       </SizableText>
                     </YStack>
-                  );
+                  )
                 })()}
               </XStack>
 
               {sucursal && (
                 <XStack jc="space-between" ai="center" mt="$1">
                   <SizableText size="$3" color="$color">
-                    Farmacia:
-                    {' '}
-                    {sucursal.nombre}
+                    Farmacia: {sucursal.nombre}
                   </SizableText>
                   <Button
                     size="$2"
@@ -114,27 +100,19 @@ export default function HistoryScreen() {
               {venta.detalles.map((detalle: any) => (
                 <XStack key={detalle.id} jc="space-between">
                   <SizableText>
-                    {detalle.cantidad}
-                    x
-                    {detalle.producto_nombre}
+                    {detalle.cantidad}x{detalle.producto_nombre}
                   </SizableText>
-                  <SizableText color="$colorHover">
-                    Bs.
-                    {' '}
-                    {detalle.subtotal.toFixed(2)}
-                  </SizableText>
+                  <SizableText color="$colorHover">Bs. {detalle.subtotal.toFixed(2)}</SizableText>
                 </XStack>
               ))}
             </YStack>
           </Card>
-        );
-      });
+        )
+      })
     }
 
-    return (
-      <SizableText color="$colorHover">No se encontraron pedidos anteriores.</SizableText>
-    );
-  };
+    return <SizableText color="$colorHover">No se encontraron pedidos anteriores.</SizableText>
+  }
 
   return (
     <YStack f={1} bg="$background" p="$4">
@@ -152,5 +130,5 @@ export default function HistoryScreen() {
         </YStack>
       </ScrollView>
     </YStack>
-  );
+  )
 }

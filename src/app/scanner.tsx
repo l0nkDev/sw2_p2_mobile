@@ -2,7 +2,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as FileSystem from 'expo-file-system/legacy';
 import { router } from 'expo-router';
 import { CheckCircle, RefreshCcw, X } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert, Image, StyleSheet, TouchableOpacity,
 } from 'react-native';
@@ -28,6 +28,13 @@ export default function ScannerScreen() {
   const [results, setResults] = useState<AIResult[] | null>(null);
 
   const cameraRef = useRef<CameraView>(null);
+
+  // Automatically request camera permission when screen opens
+  useEffect(() => {
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
+    }
+  }, [permission, requestPermission]);
 
   const dispatch = useDispatch();
   const sucursalId = useSelector((state: RootState) => state.cart.sucursalId);
@@ -123,16 +130,16 @@ export default function ScannerScreen() {
   const renderContent = () => {
     if (!permission) {
       return (
-        <YStack f={1} jc="center" ai="center">
-          <Spinner size="large" />
+        <YStack w="100%" aspectRatio={3 / 4} jc="center" ai="center" bg="black">
+          <Spinner size="large" color="white" />
         </YStack>
       );
     }
 
     if (!permission.granted) {
       return (
-        <YStack f={1} jc="center" ai="center" p="$4" gap="$4">
-          <SizableText ta="center" size="$5">
+        <YStack w="100%" aspectRatio={3 / 4} jc="center" ai="center" p="$4" gap="$4" bg="black">
+          <SizableText ta="center" size="$5" color="white">
             Necesitamos permisos de cámara para escanear tus recetas médicas.
           </SizableText>
           <Button onPress={requestPermission} bg="$color" color="white">
